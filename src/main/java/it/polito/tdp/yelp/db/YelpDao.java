@@ -6,10 +6,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import it.polito.tdp.yelp.model.Archi;
 import it.polito.tdp.yelp.model.Business;
 import it.polito.tdp.yelp.model.Review;
 import it.polito.tdp.yelp.model.User;
+import it.polito.tdp.yelp.model.Vertici;
 
 public class YelpDao {
 
@@ -111,5 +114,75 @@ public class YelpDao {
 		}
 	}
 	
+	public List<Vertici> getAllVertices(int nRecen){
+		String sql = "select u.`user_id`, COUNT(*) as numRecensioni "
+				+ "from Reviews r, Users u "
+				+ "where u.`user_id`=r.`user_id` "
+				+ "group by u.`user_id` "
+				+ "having numrecensioni>=?";
+		List<Vertici> result = new ArrayList<Vertici>();
+		Connection conn = DBConnect.getConnection();
+
+		try {
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, nRecen);
+			ResultSet res = st.executeQuery();
+			while (res.next()) {
+
+				
+				
+				result.add( new Vertici(res.getString("user_id"),
+						res.getInt("numRecensioni")));
+			}
+			res.close();
+			st.close();
+			conn.close();
+			return result;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public List<Archi> getAllEdges(int anno, Map<String, Vertici> vertexmap){
+		String sql = "select r1.`user_id`, r2.`user_id`, COUNT(*) as numRecensioni\n"
+				+ "from Reviews r1 , Reviews r2\n"
+				+ "where YEAR(r1.`review_date`)=2008 and YEAR(r2.`review_date`)=2008\n"
+				+ "and r1.`user_id` in (select distinct u.`user_id`\n"
+				+ "						from Users u, Reviews r\n"
+				+ "						where u.`user_id`=r.`user_id`\n"
+				+ "						group by r.`user_id`\n"
+				+ "						having count(*)>=200)\n"
+				+ "and r2.`user_id` in (select distinct u.`user_id`\n"
+				+ "						from Users u, Reviews r\n"
+				+ "						where u.`user_id`=r.`user_id`\n"
+				+ "						group by r.`user_id`\n"
+				+ "						having count(*)>=200)\n"
+				+ "and r1.`business_id`=r2.`business_id` and r1.`user_id`>r2.`user_id` "
+				+ "group by r1.`user_id`, r2.`user_id`";
+		List<Archi> result = new ArrayList<>();
+		Connection conn = DBConnect.getConnection();
+
+		try {
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, anno);
+			ResultSet res = st.executeQuery();
+			while (res.next()) {
+				
+				Archi a = new Archi(res.getString("user_id"),res.getString("business_id") ,res.getInt("numRecensioni"), res.getDate("review_date"));
+				if(vertexmap.containsKey(a.getUserid())){
+				result.add(a);}
+			}
+			res.close();
+			st.close();
+			conn.close();
+			return result;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 	
 }

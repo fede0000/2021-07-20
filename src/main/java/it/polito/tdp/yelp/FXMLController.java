@@ -5,9 +5,15 @@
 package it.polito.tdp.yelp;
 
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
+
+import org.jgrapht.graph.DefaultWeightedEdge;
 
 import it.polito.tdp.yelp.model.Model;
+import it.polito.tdp.yelp.model.Vertici;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -38,13 +44,13 @@ public class FXMLController {
     private TextField txtX2; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbAnno"
-    private ComboBox<?> cmbAnno; // Value injected by FXMLLoader
+    private ComboBox<Integer> cmbAnno; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtN"
     private TextField txtN; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbUtente"
-    private ComboBox<?> cmbUtente; // Value injected by FXMLLoader
+    private ComboBox<String> cmbUtente; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtX1"
     private TextField txtX1; // Value injected by FXMLLoader
@@ -54,11 +60,56 @@ public class FXMLController {
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
+    	
+    	
+    	String input = txtN.getText();
+    	
+    	if(input == "") {
+    		txtResult.setText("Numero recensioni mancante\n");
+    	}
+    	
+    	
+    	
+    	try {
+    		int inputNum = Integer.parseInt(input);
+    		
+    		Integer anno =  this.cmbAnno.getValue();
+        	
+        	if(anno==null) {
+        		txtResult.appendText("Anno mancante");
+
+        	}else {
+        		
+        		model.creaGrafo(inputNum, anno);
+        		String stringa= "I vertici sono: " + model.getNVertici()+ "\nGli archi sono: "+ model.getNArchi();
+        		txtResult.setText(stringa);
+        		
+        		this.cmbUtente.getItems().setAll(model.getVertici());
+        	}
+        	
+        	
+    		
+    		
+    	}catch(NumberFormatException e) {
+    		txtResult.setText("Errore");
+    	}
 
     }
 
     @FXML
     void doUtenteSimile(ActionEvent event) {
+    	
+    	String user = this.cmbUtente.getValue();
+    	
+    	if(user==null) {
+    		txtResult.setText("User mancante");
+    	}
+    	
+    	List<Vertici> connessi = model.TrovaPesoMaxTraVicini(user);
+		/*
+		for (Vertici v : connessi) {
+		    this.txtResult.appendText("\n" + v.getUserid() + " Numero vicini: " + connessi.size());
+		}*/
 
     }
     
@@ -84,5 +135,15 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	
+    	this.cmbAnno.getItems().add(2005);
+    	this.cmbAnno.getItems().add(2006);
+    	this.cmbAnno.getItems().add(2007);
+    	this.cmbAnno.getItems().add(2008);
+    	this.cmbAnno.getItems().add(2009);
+    	this.cmbAnno.getItems().add(2010);
+    	this.cmbAnno.getItems().add(2011);
+    	this.cmbAnno.getItems().add(2012);
+    	this.cmbAnno.getItems().add(2013);
     }
 }

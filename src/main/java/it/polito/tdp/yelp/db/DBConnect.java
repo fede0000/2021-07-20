@@ -8,7 +8,7 @@ import com.zaxxer.hikari.HikariDataSource;
 
 public class DBConnect {
 
-	private static final String jdbcURL = "jdbc:mysql://localhost/yelp";
+	private static final String jdbcURL = "jdbc:mariadb://localhost/yelp";
 	private static HikariDataSource ds;
 	
 	public static Connection getConnection() {
